@@ -1,0 +1,94 @@
+﻿@using FoodOrder.Core.Helpers;
+@model PaginatedList<FoodOrder.Core.ViewModels.Ratings.RatingVM>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">List Ratings</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+        <li class="breadcrumb-item active">List Ratings</li>
+    </ol>
+    <div class="card mb-4">
+        <div class="card-header">
+            @if ((await AuthorizationService.AuthorizeAsync(User, RoleTypes.Admin)).Succeeded)
+            {
+                <a asp-action="Create">Create New</a>
+            }
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().OrderID)
+                            </th>
+
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().FoodID)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().Star)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().Comment)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().TimeCreate)
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Items != null)
+                        {
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.ActionLink(item.OrderID.ToString(), "Details", "Orders", new { id = item.OrderID })
+                                    </td>
+                                    <td>
+                                        @Html.ActionLink(item.FoodID.ToString(), "Details", "Foods", new { id = item.FoodID })
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Star)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Comment)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.TimeCreate)
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Action
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                <a class="dropdown-item btn btn-primary" href=@Url.Action("Details", new { orderID = item.OrderID, foodID = item.FoodID })>Details</a>
+
+                                                @if ((await AuthorizationService.AuthorizeAsync(User, RoleTypes.Admin)).Succeeded)
+                                                {
+                                                    <a class="dropdown-item btn btn-primary" href=@Url.Action("Delete", new { orderID = item.OrderID, foodID = item.FoodID })>Delete</a>
+                                                }
+                                                @if ((await AuthorizationService.AuthorizeAsync(User, RoleTypes.Admin)).Succeeded)
+                                                {
+                                                    <a class="dropdown-item btn btn-primary" href=@Url.Action("Edit", new { orderID = item.OrderID, foodID = item.FoodID })>Edit</a>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

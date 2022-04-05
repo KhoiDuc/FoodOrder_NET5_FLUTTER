@@ -1,0 +1,434 @@
+﻿@using FoodOrder.Core.Helpers;
+@model PaginatedList<FoodOrder.Core.ViewModels.Orders.OrderVM>
+@using FoodOrder.Core.Models;
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">List Order</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+        <li class="breadcrumb-item active">List Order</li>
+    </ol>
+    <div class="card mb-4">
+        <div class="card-header">
+            @if ((await AuthorizationService.AuthorizeAsync(User, RoleTypes.Admin)).Succeeded)
+            {
+                <a asp-action="Create">Create New</a>
+            }
+        </div>
+        <div class="card-body">
+            <h3>Đơn hàng đang xử lý</h3>
+            <div class="table-responsive">
+                <table class="table table-bordered display" id="example" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().ID)
+                            </th>
+                            <th>
+                                Receiver
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().FinalTotalPrice)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().CreatedDate)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().OrderStatusVM.Name)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().PromotionID)
+                            </th>
+
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Items != null)
+                        {
+                            @foreach (var item in Model.Items)
+                            {
+                                if (item.OrderStatusID != 4 && item.OrderStatusID != 5)
+                                {
+                                    string fullName = item.UserVM.Name;
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.ID)
+                                        </td>
+                                        <td>
+                                            @Html.ActionLink(fullName, "Details", "User", new { id = item.UserVM.ID })
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.FinalTotalPrice)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.CreatedDate)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.OrderStatusVM.Name)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.PromotionID)
+                                        </td>
+
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Action
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                    <a class="dropdown-item btn btn-primary" href=@Url.Action("Details", new { id = item.ID })>Details</a>
+
+                                                    @if ((await AuthorizationService.AuthorizeAsync(User, RoleTypes.Admin)).Succeeded)
+                                                    {
+                                                        <a class="dropdown-item btn btn-primary" href=@Url.Action("Delete", new { id = item.ID })>Delete</a>
+                                                    }
+                                                    @if ((await AuthorizationService.AuthorizeAsync(User, RoleTypes.Admin)).Succeeded)
+                                                    {
+                                                        <a class="dropdown-item btn btn-primary" href=@Url.Action("Edit", new { id = item.ID })>Edit</a>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <h3>Đơn hàng đang đã giao hôm nay</h3>
+            <div class="table-responsive">
+                <table class="table table-bordered display" id="danhan" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().ID)
+                            </th>
+                            <th>
+                                Receiver
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().FinalTotalPrice)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().CreatedDate)
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Items != null)
+                        {
+                            @foreach (var item in Model.Items)
+                            {
+                                if (item.OrderStatusID == OrderStatus.DaNhan && item.DatePaid.Value.Date == DateTime.Now.Date)
+                                {
+                                    string fullName = item.UserVM.Name;
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.ID)
+                                        </td>
+                                        <td>
+                                            @Html.ActionLink(fullName, "Details", "User", new { id = item.UserVM.ID })
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.FinalTotalPrice)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.CreatedDate)
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Action
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                    <a class="dropdown-item btn btn-primary" href=@Url.Action("Details", new { id = item.ID })>Details</a>
+
+                                                    @if ((await AuthorizationService.AuthorizeAsync(User, RoleTypes.Admin)).Succeeded)
+                                                    {
+                                                        <a class="dropdown-item btn btn-primary" href=@Url.Action("Delete", new { id = item.ID })>Delete</a>
+                                                    }
+                                                    @if ((await AuthorizationService.AuthorizeAsync(User, RoleTypes.Admin)).Succeeded)
+                                                    {
+                                                        <a class="dropdown-item btn btn-primary" href=@Url.Action("Edit", new { id = item.ID })>Edit</a>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <h3>Đơn hàng đang đã hủy hôm nay</h3>
+            <div class="table-responsive">
+                <table class="table table-bordered display" id="dahuy" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().ID)
+                            </th>
+                            <th>
+                                Receiver
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().FinalTotalPrice)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().CreatedDate)
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Items != null)
+                        {
+                            @foreach (var item in Model.Items)
+                            {
+                                if (item.OrderStatusID == OrderStatus.DaHuy && item.DatePaid.HasValue && item.DatePaid.Value.Date == DateTime.Now.Date)
+                                {
+                                    string fullName = item.UserVM.Name;
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.ID)
+                                        </td>
+                                        <td>
+                                            @Html.ActionLink(fullName, "Details", "User", new { id = item.UserVM.ID })
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.FinalTotalPrice)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.CreatedDate)
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Action
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                    <a class="dropdown-item btn btn-primary" href=@Url.Action("Details", new { id = item.ID })>Details</a>
+
+                                                    @if ((await AuthorizationService.AuthorizeAsync(User, RoleTypes.Admin)).Succeeded)
+                                                    {
+                                                        <a class="dropdown-item btn btn-primary" href=@Url.Action("Delete", new { id = item.ID })>Delete</a>
+                                                    }
+                                                    @if ((await AuthorizationService.AuthorizeAsync(User, RoleTypes.Admin)).Succeeded)
+                                                    {
+                                                        <a class="dropdown-item btn btn-primary" href=@Url.Action("Edit", new { id = item.ID })>Edit</a>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div style="height:100px"></div>
+            <h3>Tất cả các đơn hàng</h3>
+            <div class="table-responsive">
+                <table class="table table-bordered display" id="example1" @*width="100%"*@ cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().ID)
+                            </th>
+                            <th>
+                                Receiver
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().CreatedDate)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().IsPaid)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().DatePaid)
+                            </th>
+                            <th>
+                                Order status
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().PromotionID)
+                            </th>
+
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Items != null)
+                        {
+                            @foreach (var item in Model.Items)
+                            {
+                                string fullName = item.UserVM.Name;
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.ID)
+                                    </td>
+                                    <td>
+                                        @Html.ActionLink(fullName, "Details", "User", new { id = item.UserVM.ID })
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.CreatedDate)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.IsPaid)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.DatePaid)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.OrderStatusVM.Name)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.PromotionID)
+                                    </td>
+
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Action
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                <a class="dropdown-item btn btn-primary" href=@Url.Action("Details", new { id = item.ID })>Details</a>
+
+                                                @if ((await AuthorizationService.AuthorizeAsync(User, RoleTypes.Admin)).Succeeded)
+                                                {
+                                                    <a class="dropdown-item btn btn-primary" href=@Url.Action("Delete", new { id = item.ID })>Delete</a>
+                                                }
+                                                @if ((await AuthorizationService.AuthorizeAsync(User, RoleTypes.Admin)).Succeeded)
+                                                {
+                                                    <a class="dropdown-item btn btn-primary" href=@Url.Action("Edit", new { id = item.ID })>Edit</a>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        //$(document).ready(function () {
+        //    $('table.display').DataTable();
+        //});
+
+        $(document).ready(function () {
+            // Setup - add a text input to each footer cell
+            $('#example thead tr').clone(true).appendTo('#example thead');
+            $('#example thead tr:eq(1) th').each(function (i) {
+                var title = $(this).text();
+                $(this).html('<input type="text" placeholder="Search ' + title + '" />');
+
+                $('input', this).on('keyup change', function () {
+                    if (table.column(i).search() !== this.value) {
+                        table
+                            .column(i)
+                            .search(this.value)
+                            .draw();
+                    }
+                });
+            });
+
+            var table = $('#example').DataTable({
+                orderCellsTop: true,
+                fixedHeader: true
+            });
+        });
+        $(document).ready(function () {
+            // Setup - add a text input to each footer cell
+            $('#example1 thead tr').clone(true).appendTo('#example1 thead');
+            $('#example1 thead tr:eq(1) th').each(function (i) {
+                var title = $(this).text();
+                $(this).html('<input type="text" placeholder="Search ' + title + '" />');
+
+                $('input', this).on('keyup change', function () {
+                    if (table.column(i).search() !== this.value) {
+                        table
+                            .column(i)
+                            .search(this.value)
+                            .draw();
+                    }
+                });
+            });
+
+            var table = $('#example1').DataTable({
+                orderCellsTop: true,
+                fixedHeader: true
+            });
+        });
+        $(document).ready(function () {
+            // Setup - add a text input to each footer cell
+            $('#danhan thead tr').clone(true).appendTo('#danhan thead');
+            $('#danhan thead tr:eq(1) th').each(function (i) {
+                var title = $(this).text();
+                $(this).html('<input type="text" placeholder="Search ' + title + '" />');
+
+                $('input', this).on('keyup change', function () {
+                    if (table.column(i).search() !== this.value) {
+                        table
+                            .column(i)
+                            .search(this.value)
+                            .draw();
+                    }
+                });
+            });
+
+            var table = $('#danhan').DataTable({
+                orderCellsTop: true,
+                fixedHeader: true
+            });
+        });
+
+        $(document).ready(function () {
+            // Setup - add a text input to each footer cell
+            $('#dahuy thead tr').clone(true).appendTo('#dahuy thead');
+            $('#dahuy thead tr:eq(1) th').each(function (i) {
+                var title = $(this).text();
+                $(this).html('<input type="text" placeholder="Search ' + title + '" />');
+
+                $('input', this).on('keyup change', function () {
+                    if (table.column(i).search() !== this.value) {
+                        table
+                            .column(i)
+                            .search(this.value)
+                            .draw();
+                    }
+                });
+            });
+
+            var table = $('#dahuy').DataTable({
+                orderCellsTop: true,
+                fixedHeader: true
+            });
+        });
+    </script>
+}

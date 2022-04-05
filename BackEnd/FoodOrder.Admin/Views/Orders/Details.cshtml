@@ -1,0 +1,190 @@
+﻿@model FoodOrder.Core.ViewModels.Orders.OrderVM
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    string fullName = Model.UserVM.Name;
+    double totalPrice = 0;
+    int foodCount = 0;
+    for (int i = 0; i < Model.OrderDetailVMs.Count(); i++)
+    {
+        totalPrice += Model.OrderDetailVMs[i].Price * Model.OrderDetailVMs[i].Amount *
+                                        (100 - (Model.OrderDetailVMs[i].SaleCampaignID == null ? 0 : Model.OrderDetailVMs[i].SalePercent.Value)) / 100;
+        foodCount += Model.OrderDetailVMs[i].Amount;
+    }
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Order detail</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+        <li class="breadcrumb-item active">Order detail</li>
+    </ol>
+    <div class="card mb-4">
+        <div class="card-header">
+            <a asp-action="Index">Back to list</a>
+        </div>
+        <div class="card-body">
+            <div>
+                <dl class="row">
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.ID)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.ID)
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.AppUserID)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.ActionLink(Model.AppUserID.ToString(), "Details", "User", new { id = Model.AppUserID });
+
+                    </dd>
+                    <dt class="col-sm-2">
+                        Name
+                    </dt>
+                    <dd class="col-sm-10">
+                        @fullName
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.CreatedDate)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.CreatedDate)
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.IsPaid)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.IsPaid)
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.DatePaid)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.DatePaid)
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.OrderStatusVM.Name)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.OrderStatusVM.Name)
+                    </dd>
+
+
+
+
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.PromotionID)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.ActionLink(Model.PromotionID.ToString(), "Details", "Promotions", new { id = Model.PromotionID })
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.PromotionAmount)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.PromotionAmount)
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.FinalTotalPrice)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.FinalTotalPrice)
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.AddressName)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.AddressName)
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayNameFor(model => model.AddressString)
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.AddressString)
+                    </dd>
+                    <dt class="col-sm-2">
+                        Order details
+                    </dt>
+                    <dd class="col-sm-10">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Food name</th>
+                                    <th scope="col">Amount</th>
+                                    <th scope="col">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.OrderDetailVMs.Count(); i++)
+                                {
+                                    var price = Model.OrderDetailVMs[i].Price * Model.OrderDetailVMs[i].Amount * 
+                                        (100 - (Model.OrderDetailVMs[i].SaleCampaignID == null ? 0 : Model.OrderDetailVMs[i].SalePercent)) / 100;
+                                    <tr>
+                                        <th scope="row">@i</th>
+                                        <td>
+                                            @Html.ActionLink(@Model.OrderDetailVMs[i].FoodVM.Name, "Details", "Foods", new { id = @Model.OrderDetailVMs[i].FoodVM.ID })
+                                        </td>
+                                        <td>@Model.OrderDetailVMs[i].Amount</td>
+                                        <td>@price</td>
+                                    </tr>
+                                }
+                                <tr class="bg-info">
+                                    <th scope="row">Total</th>
+                                    <td></td>
+                                    <td>@foodCount</td>
+                                    <td>@totalPrice</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+
+                    </dd>
+                </dl>
+            </div>
+
+            <div>
+                @if ((await AuthorizationService.AuthorizeAsync(User, RoleTypes.Admin)).Succeeded)
+                {
+                    <a class="btn btn-primary" href=@Url.Action("Delete", new { id = Model.ID })>Delete</a>
+                }
+                @if ((await AuthorizationService.AuthorizeAsync(User, RoleTypes.Admin)).Succeeded)
+                {
+                    <a class="btn btn-primary" href=@Url.Action("Edit", new { id = Model.ID })>Edit</a>
+                }
+            </div>
+            <div style="height:20px"></div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form class="form-inline" asp-action="ChangeStatus">
+                        <div>
+                            Change order status:
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 form-group">
+                            <label class="control-label"></label>
+                            <select asp-for="OrderStatusID"
+                                    class="form-control"
+                                    asp-items=@ViewBag.OrderStatusList>
+                            </select>
+                        </div>
+                        <div class="form-group" hidden>
+                            <label asp-for="ID" class="control-label"></label>
+                            <input asp-for="ID" class="form-control" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mb-2">Confirm change</button>
+                    </form>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
